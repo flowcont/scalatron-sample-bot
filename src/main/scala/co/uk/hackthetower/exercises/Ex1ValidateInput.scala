@@ -75,11 +75,11 @@ object Ex1ValidateInput {
 
   def extract(input: String): Map[String, Map[String, String]] = {
     val start = input.indexOf("(")
-    val end = input.lastIndexOf(")")
+    val end = input.length - 1
 
     val command = input.substring(0,start)
 
-    val group: Array[String] = input.substring(start+1,end).split(",")
+    val group: Array[String] = input.substring(start+1, end).split(",")
 
 //    React(generation: Int, name: String, time : Int, view: String, energy: String,
 //      master: (Int, Int), collision: (Int, Int), slaves: Int, state: Map[String, String])
