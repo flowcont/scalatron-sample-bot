@@ -43,6 +43,7 @@ object Ex1ValidateInput {
 
 
       comms match {
+        case Failure(_) => Invalid(OneAnd("Wrong input: Command not recognized", List()))
         case Success(commands) =>
           Try(commands("Welcome")) match {
             case Success(m) => Valid(Welcome(m("name"), m("apocalypse").toInt, m("round").toInt, m("maxslaves").toInt))
@@ -59,12 +60,12 @@ object Ex1ValidateInput {
                     case Success(v) => (v._1, v._2)
                     case Failure(_) => (2,2)
                   },
-                  m("slaves").toInt, scala.Predef.Map(m("state") -> "")))
+                  m("slaves").toInt, scala.Predef.Map()))
                 case Failure(_) => Invalid(OneAnd("Invalid command " + commands.head._1, List()))
               }
             }
           }
-        case Failure(_) => Invalid(OneAnd("Wrong input: Command not recognized", List()))
+
       }
     }
 
