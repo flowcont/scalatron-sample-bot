@@ -1,8 +1,8 @@
 package co.uk.hackthetower.exercises
 
 import cats.data.Xor
-import co.uk.hackthetower.commands.bot.BotCommands
-import co.uk.hackthetower.commands.server.ServerCommand
+import co.uk.hackthetower.commands.bot.{Explode, Spawn, Move, BotCommands}
+import co.uk.hackthetower.commands.server.{Goodbye, React, Welcome, ServerCommand}
 
 /**
   * Second exercise: Implement method 'processServerCommand'
@@ -29,5 +29,45 @@ import co.uk.hackthetower.commands.server.ServerCommand
   */
 object Ex2BotLogic {
 
-  def processServerCommand(command: Xor[String, ServerCommand]): Xor[String, List[BotCommands]] = Xor.left("Not sure what to do")
+  val r = scala.util.Random
+
+  def processServerCommand(command: Xor[String, ServerCommand]): Xor[String, List[BotCommands]] = {
+
+    val comm =
+    if (command.isLeft)
+      Ex1ValidateInput.parseInput(command.swap.getOrElse(""))
+    else
+      command.getOrElse()
+
+    //    React(generation: Int, name: String, time : Int, view: String, energy: String,
+    //      master: (Int, Int), collision: (Int, Int), slaves: Int, state: Map[String, String])
+
+    val n1 = r.nextInt(2) match {
+      case 0 => 0
+      case 1 => 1
+      case 2 => -1
+    }
+
+    val n2 = r.nextInt(2) match {
+      case 0 => 0
+      case 1 => 1
+      case 2 => -1
+    }
+
+    comm match {
+      case Welcome(name,apoc,round,max) => Xor.Right(List(Move(1,1), Spawn((1,-1),"miniMe",2,Map())))
+      case React(0, name, t, view, energy, m, coll, numSlaves, _) if coll._1 < 2 => Xor.Right(List(Move(n1,n2) ) )
+      case React(0, name, t, view, energy, m, coll, numSlaves, _) => Xor.Right(List(Move(1,1),
+        Spawn((1,-1),"miniMe",2,Map()) ) )
+      case React(gen, name, t, view, energy, m, coll, numSlaves, _) if coll._1 < 2 => Xor.Right(List(Explode(2)))
+      case React(gen, name, t, view, energy, m, coll, numSlaves, _) => Xor.Right(List(Move(n1,n2)))
+      case Goodbye(energy) => Xor.Left("Bye bye!!")
+    }
+
+//    Xor.left("Not sure what to do")
+  }
+
+
+
+
 }

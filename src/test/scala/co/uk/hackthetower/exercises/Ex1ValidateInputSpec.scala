@@ -8,7 +8,7 @@ import scala.util.Random
 class Ex1ValidateInputSpec extends FlatSpec with Matchers {
 
   "parseInput" should "return Valid if input contains a valid server command" in {
-    val input = "Goodbye(-1)"
+    val input = "Goodbye(energy=-1)"
     Ex1ValidateInput.parseInput(input).isValid should be(true)
   }
 

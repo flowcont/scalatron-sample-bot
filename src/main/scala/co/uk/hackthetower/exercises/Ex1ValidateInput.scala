@@ -1,8 +1,10 @@
 package co.uk.hackthetower.exercises
 
-import cats.data.Validated.Invalid
+import cats.data.Validated._
 import cats.data.{OneAnd, ValidatedNel}
-import co.uk.hackthetower.commands.server.ServerCommand
+import co.uk.hackthetower.commands.server._
+import scala.util.{Try,Success,Failure}
+import scala.collection.Map
 
 /**
   * First exercise: Implement method 'parseInput'.
@@ -31,6 +33,63 @@ object Ex1ValidateInput {
     * @param input the input sent by the server. As per specification it will only have 1 command.
     * @return a ValidatedNel[String, ServerCommand], equivalent to Validated[NonEmptyList[String], ServerCommand]
     */
-  def parseInput(input: String): ValidatedNel[String, ServerCommand] = Invalid(OneAnd("Missing implementation", List()))
+  def parseInput(input: String): ValidatedNel[String, ServerCommand] = {
+
+    if (input.isEmpty)
+      Invalid(OneAnd("Empty input", List()))
+    else
+    {
+      val comms = Try(extract(input))
+
+
+      comms match {
+        case Success(commands) =>
+          Try(commands("Welcome")) match {
+            case Success(m) => Valid(Welcome(m("name"), m("apocalypse").toInt, m("round").toInt, m("maxslaves").toInt))
+            case Failure(_) => Try(commands("Goodbye")) match {
+              case Success(m) => Valid(Goodbye(m("energy").toInt))
+              case Failure(_) => Try(commands("React")) match {
+                case Success(m) => Valid(React(m("generation").toInt, m("name"), m("time").toInt, m("view"),
+                  m("energy"),
+                  Try((m("master").split(":")(0).toInt, m("master").split(":")(1).toInt)) match{
+                    case Success(v) => (v._1, v._2)
+                    case Failure(_) => (0,0)
+                  },
+                  Try((m("collision").split(":")(0).toInt, m("collision").split(":")(1).toInt)) match {
+                    case Success(v) => (v._1, v._2)
+                    case Failure(_) => (2,2)
+                  },
+                  m("slaves").toInt, scala.Predef.Map(m("state") -> "")))
+                case Failure(_) => Invalid(OneAnd("Invalid command " + commands.head._1, List()))
+              }
+            }
+          }
+        case Failure(_) => Invalid(OneAnd("Wrong input: Command not recognized", List()))
+      }
+    }
+
+
+    //Invalid(OneAnd("Missing implementation", List()))
+  }
+
+  def extract(input: String): Map[String, Map[String, String]] = {
+    val start = input.indexOf("(")
+    val end = input.lastIndexOf(")")
+
+    val command = input.substring(0,start)
+
+    val group: Array[String] = input.substring(start+1,end).split(",")
+
+//    React(generation: Int, name: String, time : Int, view: String, energy: String,
+//      master: (Int, Int), collision: (Int, Int), slaves: Int, state: Map[String, String])
+
+    val mapArgs = group.map{ elem =>
+      val arr = elem.split("=")
+      arr(0).toLowerCase -> arr(1)
+    }.toMap
+
+    Map(command -> mapArgs)
+  }
+
 
 }
